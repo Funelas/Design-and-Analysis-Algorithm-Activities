@@ -44,8 +44,34 @@ def selection_sort(array):
         array[i], array[sml_index] = array[sml_index], array[i]  # Swap the smallest element
 
 # Bubble Sort
-
+def bubble_sort(array):
+    not_swapped = True
+    for i in range(len(array)):
+        for j in range(1, len(array) - i):
+            if array[j] < array[j-1]:
+                array[j],array[j-1] = array[j-1],array[j]
+                not_swapped = False
+        if not_swapped:
+            break
+            
 # Insertion Sort
+def insertion_sort(array):
+    for i in range(1, len(array)):
+        j = i-1
+        key = array[i]
+        while j >= 0 and key < array[j]:
+            array[j+1] = array[j]
+            j -= 1
+        array[j+1] = key 
+
+# 78 25 5 65 62 33 48 98 8 70 35 80 91 34 29 14 20 26 66 66
+#       temp    key   
+# 78    25      5
+#               array[]
+# 78    25      25
+# 25    78      25
+# 5     78      25
+
 user_inputs = []
 
 
@@ -64,13 +90,25 @@ while True:
         break
 
 
-# for arr in user_inputs:
-#     merge_sort(arr)
+for arr in user_inputs.copy():
+    merge_sort(arr)
+mergesort_timer = timeit.timeit(stmt='for arr in user_inputs: merge_sort(arr)', setup="from __main__ import merge_sort, user_inputs", number= 10)
+print(f"Merge Sort Average Timer: {mergesort_timer}")
 
-for arr in user_inputs:
+
+for arr in user_inputs.copy():
     selection_sort(arr)
-
-# mergesort_timer = timeit.timeit(stmt='for arr in user_inputs: merge_sort(arr)', setup="from __main__ import merge_sort, user_inputs", number= 10)
-# print(mergesort_timer)
 selectionsort_timer = timeit.timeit(stmt='for arr in user_inputs: selection_sort(arr)', setup="from __main__ import selection_sort, user_inputs", number= 10)
-print(selectionsort_timer)
+print(f"Selection Sort Average Timer: {selectionsort_timer}")
+
+for arr in user_inputs.copy():
+    bubble_sort(arr)
+bubblesort_timer = timeit.timeit(stmt='for arr in user_inputs: bubble_sort(arr)', setup="from __main__ import bubble_sort, user_inputs", number= 10)
+print(f"Bubble Sort Average Timer: {bubblesort_timer}")
+
+
+
+for arr in user_inputs.copy():
+    insertion_sort(arr)
+insertionsort_timer = timeit.timeit(stmt='for arr in user_inputs: insertion_sort(arr)', setup="from __main__ import insertion_sort, user_inputs", number= 10)
+print(f"Insertion Sort Average Timer: {insertionsort_timer}")

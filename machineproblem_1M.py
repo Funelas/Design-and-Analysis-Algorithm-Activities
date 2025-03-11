@@ -64,14 +64,6 @@ def insertion_sort(array):
             j -= 1
         array[j+1] = key 
 
-# 78 25 5 65 62 33 48 98 8 70 35 80 91 34 29 14 20 26 66 66
-#       temp    key   
-# 78    25      5
-#               array[]
-# 78    25      25
-# 25    78      25
-# 5     78      25
-
 user_inputs = []
 
 

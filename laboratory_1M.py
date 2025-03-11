@@ -27,6 +27,94 @@ def log_in():
         dashboard_frame.pack()
     else:
         error_label.pack()
+def submit():
+    global dropdown_value, pc_number_entry, rooms, report_stack
+    if dropdown_value.get() and pc_number_entry_value.get():
+        rooms[report_stack.stack[0]].enqueue(Computer(pc_number_entry_value.get(), dropdown_value.get()))
+        report_broken_error_label.forget()
+        report_broken_success_label.pack(pady = 10)
+        pc_number_entry_value.set("")
+        dropdown_value.set("")
+        update_lab_status()
+    else:
+        report_broken_success_label.forget()
+        report_broken_error_label.pack(pady = 10)
+def report(source):
+    global report_stack
+    if source == 5:
+        report_type_frm.forget()
+        report_fix_frm.forget()
+        report_broken_frm.forget()
+        report_stack.pop()
+        report_frm.pack()
+    elif source in [0,1,2,3]:
+        report_frm.forget()
+        report_broken_frm.forget()
+        report_fix_frm.forget()
+        report_stack.push(source)
+        report_type_frm.pack()
+    elif source == 6:
+        report_frm.forget()
+        report_broken_frm.forget()
+        report_stack.pop()
+        report_fix_frm.forget()
+        report_broken_success_label.forget()
+        report_broken_error_label.forget()
+        report_type_frm.pack()
+    elif source == 7:
+        report_frm.forget()
+        report_broken_frm.forget()
+        report_type_frm.forget()
+        if len(report_stack.stack) < 2:
+            report_stack.push(source)
+        for widget in report_fix_frm.winfo_children():
+            widget.destroy()
+
+        report_fix_label = tk.Label(report_fix_frm, text="Report Fixed PC", font=("Monospace", 15, 'bold'))
+        report_fix_label.pack(pady=20)
+
+        if report_stack.stack and rooms[report_stack.stack[0]].queue:
+            report_fix_pc_number_label = tk.Label(report_fix_frm, text="PC Number: ", font=("Monospace", 12, 'bold'))
+            report_fix_pc_number_label.pack(pady=5)
+            report_fix_pc_number_value = tk.Label(report_fix_frm, text=f"{rooms[report_stack.stack[0]].queue[0].pc_number}", font=("Monospace", 14))
+            report_fix_pc_number_value.pack(pady=5)
+
+            report_fix_pc_type_label = tk.Label(report_fix_frm, text="PC Type: ", font=("Monospace", 12, 'bold'))
+            report_fix_pc_type_label.pack(pady=5)
+            report_fix_pc_type_value = tk.Label(report_fix_frm, text=f"{rooms[report_stack.stack[0]].queue[0].pc_type}", font=("Monospace", 14))
+            report_fix_pc_type_value.pack(pady=5)
+
+            report_fix_complete_btn = tk.Button(report_fix_frm, text="Complete/Fixed", font=("Monospace", 12, 'bold'), command=fix)
+            report_fix_complete_btn.pack(pady=20, fill="x", padx=10)
+        else:
+            report_fix_none_label = tk.Label(report_fix_frm, text="There are no computers that need fixing\nat the moment.", font=("Monospace", 12, 'bold'))
+            report_fix_none_label.pack(pady=50)
+
+        report_fix_goback_btn = tk.Button(report_fix_frm, text="Go back", font=("Monospace", 12, 'bold'), command=lambda: report(6), height=3, width=20)
+        report_fix_goback_btn.pack(fill="x", padx=20, pady=10)
+
+        report_fix_frm.pack()  # Now it dynamically updates
+    elif source == 8:
+        report_frm.forget()
+        report_type_frm.forget()
+        report_fix_frm.forget()
+        report_stack.push(source)
+        report_broken_frm.pack()
+    else:
+        report_frm.forget()
+        report_type_frm.pack()
+        report_stack.push(source)
+    print(report_stack.stack)
+def fix():
+    rooms[report_stack.stack[0]].dequeue()
+    report(7)
+    update_lab_status()
+def update_lab_status():
+    for item in lab_treeview.get_children():
+        lab_treeview.delete(item)  # Clear old data
+    lab_treeview_data = [room.shape() for room in rooms]
+    for item in lab_treeview_data:
+        lab_treeview.insert("", tk.END, values=item)
 def dashboard_switch(screen):
     if screen == 0:
         lab_stat_frame.forget()
@@ -134,27 +222,6 @@ go_back_btn = tk.Button(lab_stat_frame, text= "Go Back", command= lambda: dashbo
 go_back_btn.pack(padx= 10, pady= 10)
 # Laboratory Status Frame End
 
-def report(source):
-    global report_stack
-    if source == 5:
-        report_type_frm.forget()
-        report_frm.pack()
-        report_broken_frm.forget()
-        report_stack.pop()
-    elif source == 1:
-        report_frm.forget()
-        report_type_frm.forget()
-        report_broken_frm.pack()
-        report_stack.push(source)
-    elif source == 6:
-        report_frm.forget()
-        report_broken_frm.forget()
-        report_stack.pop()
-        report_type_frm.pack()
-    else:
-        report_frm.forget()
-        report_type_frm.pack()
-        report_stack.push(source)
 
 # Report Frame Start
 report_stack = Stack()
@@ -172,25 +239,15 @@ report_goback_btn.pack(fill="x", padx= 20, pady= 50)
 
 ## Complete or Broken Frame Start ##
 report_type_frm = tk.Frame(root)
-report_fix_btn = tk.Button(report_type_frm, text= "Report Fix", font=("Monospace", 12, 'bold'), height= 3, width= 20)
+report_fix_btn = tk.Button(report_type_frm, text= "Report Fix", font=("Monospace", 12, 'bold'), height= 3, width= 20, command=lambda: report(7))
 report_fix_btn.pack(fill="x", padx= 20, pady= 50)
-report_broken_btn = tk.Button(report_type_frm, text= "Report Broken", font=("Monospace", 12, 'bold'), height= 3, width= 20, command= lambda: report(1))
+report_broken_btn = tk.Button(report_type_frm, text= "Report Broken", font=("Monospace", 12, 'bold'), height= 3, width= 20, command= lambda: report(8))
 report_broken_btn.pack(fill="x", padx= 20, pady= 50)
 report_type_goback_btn = tk.Button(report_type_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: report(5), height= 3, width= 20)
 report_type_goback_btn.pack(fill="x", padx= 20, pady= 50)
 ## Complete or Broken Frame End ##
 
-def submit():
-    global dropdown_value, pc_number_entry, rooms, report_stack
-    if dropdown_value.get() and pc_number_entry_value.get():
-        rooms[report_stack.stack[0]].enqueue(Computer(pc_number_entry_value.get(), dropdown_value.get()))
-        report_broken_error_label.forget()
-        report_broken_success_label.pack(pady = 10)
-        pc_number_entry_value.set("")
-        dropdown_value.set("")
-    else:
-        report_broken_success_label.forget()
-        report_broken_error_label.pack(pady = 10)
+
 ### Report Broken Frame Start ###
 report_broken_frm = tk.Frame(root)
 report_broken_label = tk.Label(report_broken_frm, text= "Report Broken PC", font=("Monospace", 15, 'bold'))
@@ -214,6 +271,16 @@ report_broken_goback_btn.pack(fill="x", padx= 20, pady= 25)
 report_broken_error_label = tk.Label(report_broken_frm, text= "Please fill out all\nnecessary information", font=("Monospace", 8, 'bold'), fg= 'red')
 report_broken_success_label = tk.Label(report_broken_frm, text= "Record submitted.", font=("Monospace", 8, 'bold'), fg= 'green')
 ### Report Broken Frame End ###
+
+
+### Report Fix Frame Start ###
+report_fix_frm = tk.Frame(root)
+report_fix_label = tk.Label(report_fix_frm, text= "Report Fixed PC", font=("Monospace", 15, 'bold'))
+report_fix_label.pack(pady=20)
+
+report_fix_goback_btn = tk.Button(report_fix_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: report(6), height= 3, width= 20)
+report_fix_goback_btn.pack(fill="x", padx= 20, pady= 10)
+### Report Fix Frame End ###
 # Report Frame End
 # Run the application
 root.mainloop()

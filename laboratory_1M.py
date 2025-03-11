@@ -5,7 +5,7 @@ class Computer:
         self.pc_number = pc_number
         self.pc_type = pc_type
 class Queue:
-    def __init__(self, name):
+    def __init__(self, name = ""):
         self.queue = []
         self.total_pc_number = 40
         self.name = name
@@ -29,12 +29,22 @@ def log_in():
         error_label.pack()
 def dashboard_switch(screen):
     if screen == 0:
-        dashboard_frame.pack()
         lab_stat_frame.forget()
+        report_frm.forget()
+        dashboard_frame.pack()
     elif screen == 1:
         dashboard_frame.forget()
         lab_stat_frame.pack()
-
+    elif screen == 2:
+        dashboard_frame.forget()
+        report_frm.pack()
+class Stack:
+    def __init__(self):
+        self.stack = []
+    def push(self, value):
+        self.stack.append(value)
+    def pop(self):
+        self.stack.pop()
 # Initializing Variables
 clab1 = Queue('Comp Lab1')
 clab2 = Queue('Comp Lab2')
@@ -84,7 +94,7 @@ frame_top = tk.Frame(dashboard_frame, padx= 20, pady= 100)
 status_btn = tk.Button(frame_top, text= "Laboratory\nStatus", font=("Monospace", 12, 'bold'), width= 10, height= 3, command=lambda : dashboard_switch(1))
 status_btn.pack(side="left", padx= 5)
 
-report_btn = tk.Button(frame_top, text= "Report", font=("Monospace", 12, 'bold'), width= 10, height= 3)
+report_btn = tk.Button(frame_top, text= "Report", font=("Monospace", 12, 'bold'), width= 10, height= 3, command=lambda: dashboard_switch(2))
 report_btn.pack(side="left", padx= 5)
 frame_top.pack()
 
@@ -122,9 +132,88 @@ lab_treeview.pack(pady = 10)
 
 go_back_btn = tk.Button(lab_stat_frame, text= "Go Back", command= lambda: dashboard_switch(0))
 go_back_btn.pack(padx= 10, pady= 10)
-
-
 # Laboratory Status Frame End
 
+def report(source):
+    global report_stack
+    if source == 5:
+        report_type_frm.forget()
+        report_frm.pack()
+        report_broken_frm.forget()
+        report_stack.pop()
+    elif source == 1:
+        report_frm.forget()
+        report_type_frm.forget()
+        report_broken_frm.pack()
+        report_stack.push(source)
+    elif source == 6:
+        report_frm.forget()
+        report_broken_frm.forget()
+        report_stack.pop()
+        report_type_frm.pack()
+    else:
+        report_frm.forget()
+        report_type_frm.pack()
+        report_stack.push(source)
+
+# Report Frame Start
+report_stack = Stack()
+report_frm = tk.Frame(root)
+clab1_btn = tk.Button(report_frm, text= "Comp Lab 1", font=("Monospace", 12, 'bold'), command=lambda: report(0), width= 40, height= 3)
+clab1_btn.pack(fill= "x", padx= 5, pady= 10)
+clab2_btn = tk.Button(report_frm, text= "Comp Lab 2", font=("Monospace", 12, 'bold'), command=lambda: report(1), width= 40, height= 3)
+clab2_btn.pack(fill= "x", padx= 5, pady= 10)
+clab3_btn = tk.Button(report_frm, text= "Comp Lab 3", font=("Monospace", 12, 'bold'), command=lambda: report(2), width= 40, height= 3)
+clab3_btn.pack(fill= "x", padx= 5, pady= 10)
+maclab_btn = tk.Button(report_frm, text= "Mac Lab", font=("Monospace", 12, 'bold'), command=lambda: report(3), width= 40, height= 3)
+maclab_btn.pack(fill= "x", padx= 5, pady= 10)
+report_goback_btn = tk.Button(report_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: dashboard_switch(0), width= 40, height= 3)
+report_goback_btn.pack(fill="x", padx= 20, pady= 50)
+
+## Complete or Broken Frame Start ##
+report_type_frm = tk.Frame(root)
+report_fix_btn = tk.Button(report_type_frm, text= "Report Fix", font=("Monospace", 12, 'bold'), height= 3, width= 20)
+report_fix_btn.pack(fill="x", padx= 20, pady= 50)
+report_broken_btn = tk.Button(report_type_frm, text= "Report Broken", font=("Monospace", 12, 'bold'), height= 3, width= 20, command= lambda: report(1))
+report_broken_btn.pack(fill="x", padx= 20, pady= 50)
+report_type_goback_btn = tk.Button(report_type_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: report(5), height= 3, width= 20)
+report_type_goback_btn.pack(fill="x", padx= 20, pady= 50)
+## Complete or Broken Frame End ##
+
+def submit():
+    global dropdown_value, pc_number_entry, rooms, report_stack
+    if dropdown_value.get() and pc_number_entry_value.get():
+        rooms[report_stack.stack[0]].enqueue(Computer(pc_number_entry_value.get(), dropdown_value.get()))
+        report_broken_error_label.forget()
+        report_broken_success_label.pack(pady = 10)
+        pc_number_entry_value.set("")
+        dropdown_value.set("")
+    else:
+        report_broken_success_label.forget()
+        report_broken_error_label.pack(pady = 10)
+### Report Broken Frame Start ###
+report_broken_frm = tk.Frame(root)
+report_broken_label = tk.Label(report_broken_frm, text= "Report Broken PC", font=("Monospace", 15, 'bold'))
+report_broken_label.pack(pady= 20)
+pc_number_label = tk.Label(report_broken_frm, text= "PC Number: ", font=("Monospace", 10, 'bold'), anchor='w')
+pc_number_label.pack(fill="x")
+pc_number_entry_value = tk.StringVar()
+pc_number_entry = tk.Entry(report_broken_frm, width=30, justify= "left", textvariable= pc_number_entry_value)
+pc_number_entry.pack(pady=5)
+
+pc_type_label = tk.Label(report_broken_frm, text= "PC Type: ", font=("Monospace", 10, 'bold'), anchor='w')
+pc_type_label.pack(fill="x")
+dropdown_value = tk.StringVar()
+dropdown = ttk.Combobox(report_broken_frm, textvariable= dropdown_value, state="readonly")
+dropdown['values'] = ("Windows Computer", "Macintosh Computer")
+dropdown.pack(pady= 10)
+report_broken_submit_btn = tk.Button(report_broken_frm, text= "Submit", font=("Monospace", 12, 'bold'), command=submit, height= 3, width= 20)
+report_broken_submit_btn.pack(fill="x", padx= 20, pady= 25)
+report_broken_goback_btn = tk.Button(report_broken_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: report(6), height= 3, width= 20)
+report_broken_goback_btn.pack(fill="x", padx= 20, pady= 25)
+report_broken_error_label = tk.Label(report_broken_frm, text= "Please fill out all\nnecessary information", font=("Monospace", 8, 'bold'), fg= 'red')
+report_broken_success_label = tk.Label(report_broken_frm, text= "Record submitted.", font=("Monospace", 8, 'bold'), fg= 'green')
+### Report Broken Frame End ###
+# Report Frame End
 # Run the application
 root.mainloop()

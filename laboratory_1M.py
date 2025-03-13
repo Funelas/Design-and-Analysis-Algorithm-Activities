@@ -5,9 +5,12 @@ class Computer:
         self.pc_number = pc_number
         self.pc_type = pc_type
 class Queue:
-    def __init__(self, name = ""):
-        self.queue = []
-        self.total_pc_number = 40
+    def __init__(self, name = "", for_inventory = False, type = None):
+        if for_inventory:
+            self.queue = [Computer(i, "Windows Computer" if type == 0 else "Macintosh Computer" if type == 1 else "") for i in range(5)]
+        else:
+            self.queue = []
+        self.total_pc_number = 40 if not for_inventory else len(self.queue)
         self.name = name
     
     def enqueue(self, value):
@@ -104,7 +107,6 @@ def report(source):
         report_frm.forget()
         report_type_frm.pack()
         report_stack.push(source)
-    print(report_stack.stack)
 def fix():
     rooms[report_stack.stack[0]].dequeue()
     report(7)
@@ -117,6 +119,7 @@ def update_lab_status():
         lab_treeview.insert("", tk.END, values=item)
 def dashboard_switch(screen):
     if screen == 0:
+        inventory_frm.forget()
         lab_stat_frame.forget()
         report_frm.forget()
         dashboard_frame.pack()
@@ -126,6 +129,23 @@ def dashboard_switch(screen):
     elif screen == 2:
         dashboard_frame.forget()
         report_frm.pack()
+    elif screen == 3:
+        dashboard_frame.forget()
+        takeout_frm.forget()
+        for widget in inventory_frm.winfo_children():
+            widget.destroy()
+        inventory_label = tk.Label(inventory_frm, text= "Inventory", font=("Monospace", 15, 'bold'))
+        inventory_label.pack(pady = 20)
+
+        inventory_windows_btn = tk.Button(inventory_frm, text=f"Windows PC Units\nAvailable: {windows_inventory.shape()[2]}", font=("Monospace", 12, 'bold'), command= lambda: select_inventory(0))
+        inventory_windows_btn.pack(pady = 30)
+
+        inventory_mac_btn = tk.Button(inventory_frm, text=f"Macintosh PC Units\nAvailable: {mac_inventory.shape()[2]}", font=("Monospace", 12, 'bold'), command= lambda: select_inventory(1))
+        inventory_mac_btn.pack(pady = 30)
+
+        inventory_goback_btn = tk.Button(inventory_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: dashboard_switch(0), height= 3, width= 20)
+        inventory_goback_btn.pack(fill="x", padx= 20, pady= 25)
+        inventory_frm.pack()
 class Stack:
     def __init__(self):
         self.stack = []
@@ -187,7 +207,7 @@ report_btn.pack(side="left", padx= 5)
 frame_top.pack()
 
 frame_bottom = tk.Frame(dashboard_frame, padx= 20)
-inventory_btn = tk.Button(frame_bottom, text= "Inventory", font=("Monospace", 12, 'bold'), width= 10, height= 3)
+inventory_btn = tk.Button(frame_bottom, text= "Inventory", font=("Monospace", 12, 'bold'), width= 10, height= 3, command= lambda: dashboard_switch(3))
 inventory_btn.pack(side="left", padx= 5)
 logout_btn = tk.Button(frame_bottom, text= "Log out", font=("Monospace", 12, 'bold'), width= 10, height= 3)
 logout_btn.pack(side="left", padx= 5)
@@ -282,5 +302,51 @@ report_fix_goback_btn = tk.Button(report_fix_frm, text= "Go back", font=("Monosp
 report_fix_goback_btn.pack(fill="x", padx= 20, pady= 10)
 ### Report Fix Frame End ###
 # Report Frame End
+
+def takeout_from_inventory(type_number):
+    type_inventory[type_number].dequeue()
+    select_inventory(type_number)
+def select_inventory(type_number):
+    inventory_frm.forget()
+    for widget in takeout_frm.winfo_children():
+        widget.destroy()
+    takeout_label = tk.Label(takeout_frm, text= "Inventory", font=("Monospace", 15, 'bold'))
+    takeout_label.pack(pady=20)
+    if type_inventory[type_number].queue:
+        available_pc_number_label = tk.Label(takeout_frm, text="PC Number: ", font=("Monospace", 12, 'bold'))
+        available_pc_number_label.pack(pady=5)
+        available_pc_number_value = tk.Label(takeout_frm, text=f"{type_inventory[type_number].queue[0].pc_number}", font=("Monospace", 14))
+        available_pc_number_value.pack(pady=5)
+
+        available_pc_type_label = tk.Label(takeout_frm, text="PC Type: ", font=("Monospace", 12, 'bold'))
+        available_pc_type_label.pack(pady=5)
+        available_pc_type_value = tk.Label(takeout_frm, text=f"{type_inventory[type_number].queue[0].pc_type}", font=("Monospace", 14))
+        available_pc_type_value.pack(pady=5)
+
+        checkout_btn = tk.Button(takeout_frm, text="Checkout", font=("Monospace", 12, 'bold'), command=lambda: takeout_from_inventory(type_number))
+        checkout_btn.pack(pady=20, fill="x", padx=10)
+
+        
+    else:
+        available_none_label = tk.Label(takeout_frm, text="There are no available replacement\nat the moment.", font=("Monospace", 12, 'bold'))
+        available_none_label.pack(pady=50)
+    takeout_goback_btn = tk.Button(takeout_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: dashboard_switch(3), height= 3, width= 20)
+    takeout_goback_btn.pack(fill="x", padx= 20, pady= 25)
+    takeout_frm.pack()
+
+windows_inventory = Queue(for_inventory= True, type= 0)
+mac_inventory = Queue(for_inventory= True, type= 1)
+inventory_stack = Stack()
+type_inventory = [windows_inventory, mac_inventory]
+# Inventory Frame Start #
+inventory_frm = tk.Frame(root)
+
+## Take out Frame Start ##
+takeout_frm = tk.Frame(root)
+
+
+
+## Take out Frame End ##
+# Inventory Frame End #
 # Run the application
 root.mainloop()

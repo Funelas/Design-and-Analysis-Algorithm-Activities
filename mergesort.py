@@ -9,12 +9,12 @@ def merge_sort(array):
         merge_sort(left)
         merge_sort(right)
         while left_index < len(left) and right_index < len(right):
-            if left[left_index] > right[right_index]:
-                array[main_index] = right[right_index]
-                right_index += 1
-            else:
+            if left[left_index] <= right[right_index]:
                 array[main_index] = left[left_index]
                 left_index += 1
+            else:
+                array[main_index] = right[right_index]
+                right_index += 1
             main_index += 1
         while left_index < len(left):
             array[main_index] = left[left_index]
@@ -24,7 +24,12 @@ def merge_sort(array):
             array[main_index] = right[right_index]
             main_index += 1
             right_index += 1
+    
 
-my_array = [1,54,1,23,5,12,23,123,5,123]
-merge_sort(my_array)
-print(my_array)
+A = [15, 36, 78, 9, 1, 0]
+B = [25, 26, 47, 26, 45, 26]
+merge_sort(A)
+merge_sort(B)
+print("Using Merge Sort: ")
+print(f"Sorted array (Set A): {A}")
+print(f"Sorted array (Set B): {B}")

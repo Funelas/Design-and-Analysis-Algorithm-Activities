@@ -5,13 +5,15 @@ def bubbleSort(array):
                 temp = array[j]
                 array[j] = array [j+1]
                 array[j+1] = temp
-        print(f"Iteration {i+1}: {array}")
-
+    
     return array
 
-data = [-5, 36, 25, 2 , -10]
+A = [15, 36, 78, 9, 1, 0]
+B = [25, 26, 47, 26, 45, 26]
 
-bubbleSort(data)
+set_a = bubbleSort(A)
+set_b = bubbleSort(B)
 
-print('Sorted Array in Ascending Order: ')
-print(data)
+print("Using Bubble Sort: ")
+print(f"Sorted array (Set A): {set_a}")
+print(f"Sorted array (Set B): {set_b}")

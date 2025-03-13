@@ -28,6 +28,8 @@ def log_in():
         error_label.forget()
         log_in_frame.forget()
         dashboard_frame.pack()
+        username_entry.delete(0, tk.END)
+        password_entry.delete(0,tk.END)
     else:
         error_label.pack()
 def submit():
@@ -102,7 +104,7 @@ def report(source):
         report_type_frm.forget()
         report_fix_frm.forget()
         report_stack.push(source)
-        report_broken_frm.pack()
+        report_broken_frm.pack()     
     else:
         report_frm.forget()
         report_type_frm.pack()
@@ -119,6 +121,7 @@ def update_lab_status():
         lab_treeview.insert("", tk.END, values=item)
 def dashboard_switch(screen):
     if screen == 0:
+        confirmation_frm.forget()
         inventory_frm.forget()
         lab_stat_frame.forget()
         report_frm.forget()
@@ -146,6 +149,12 @@ def dashboard_switch(screen):
         inventory_goback_btn = tk.Button(inventory_frm, text= "Go back", font=("Monospace", 12, 'bold'), command=lambda: dashboard_switch(0), height= 3, width= 20)
         inventory_goback_btn.pack(fill="x", padx= 20, pady= 25)
         inventory_frm.pack()
+    elif screen == 4:
+        dashboard_frame.forget()
+        confirmation_frm.pack()
+    elif screen == 5:
+        confirmation_frm.forget()
+        log_in_frame.pack()
 class Stack:
     def __init__(self):
         self.stack = []
@@ -209,7 +218,7 @@ frame_top.pack()
 frame_bottom = tk.Frame(dashboard_frame, padx= 20)
 inventory_btn = tk.Button(frame_bottom, text= "Inventory", font=("Monospace", 12, 'bold'), width= 10, height= 3, command= lambda: dashboard_switch(3))
 inventory_btn.pack(side="left", padx= 5)
-logout_btn = tk.Button(frame_bottom, text= "Log out", font=("Monospace", 12, 'bold'), width= 10, height= 3)
+logout_btn = tk.Button(frame_bottom, text= "Log out", font=("Monospace", 12, 'bold'), width= 10, height= 3, command= lambda: dashboard_switch(4))
 logout_btn.pack(side="left", padx= 5)
 frame_bottom.pack()
 # Dashboard Frame End
@@ -343,10 +352,15 @@ inventory_frm = tk.Frame(root)
 
 ## Take out Frame Start ##
 takeout_frm = tk.Frame(root)
-
-
-
 ## Take out Frame End ##
+
 # Inventory Frame End #
+confirmation_frm = tk.Frame(root)
+confirmation_lbl = tk.Label(confirmation_frm, text= "Are you sure you want\nto log out?", font=("Monospace", 12, 'bold'))
+confirmation_lbl.pack(pady= 30)
+yes_btn = tk.Button(confirmation_frm, text= "Log Out", font=("Monospace", 12, 'bold'), command= lambda: dashboard_switch(5))
+yes_btn.pack(side="left", padx= 25, pady= 100)
+no_btn = tk.Button(confirmation_frm, text= "Cancel", font=("Monospace", 12, 'bold'), command= lambda: dashboard_switch(0))
+no_btn.pack(side="left", padx= 25, pady= 100)
 # Run the application
 root.mainloop()
